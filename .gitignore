@@ -114,4 +114,4 @@ GitHub.sublime-settings
 # Celery
 celerybeat-schedule
 
-locations/geoip/
+frontend/node_modules/
