@@ -1,0 +1,46 @@
+version: "3.9"
+services:
+  frontend:
+    build: ./frontend
+    command: npm run dev
+    ports:
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+    env_file:
+      - ./.env
+    depends_on:
+      - backend
+      - centrifugo
+  backend:
+    build: ./backend
+    command: uvicorn src.main:app --host 0.0.0.0 --port ${BACKEND_PORT}  --reload
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
+    env_file:
+      - ./.env
+    depends_on:
+      - centrifugo
+  centrifugo:
+    container_name: centrifugo
+    image: centrifugo/centrifugo:latest
+    volumes:
+      - ./centrifugo/config.json:/centrifugo/config.json
+    command: centrifugo -c config.json
+    ports:
+      - "${CENTRIFUGO_PORT}:${CENTRIFUGO_PORT}"
+    env_file:
+      - ./.env
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+  mongo:
+    image: mongo:latest
+    volumes:
+      - mongo_data:/data/db
+    env_file:
+      - ./.env
+    ports:
+      - "${MONGODB_PORT}:${MONGODB_PORT}"
+
+volumes:
+  mongo_data:
