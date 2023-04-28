@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 from .fields import PyObjectId
 
 if TYPE_CHECKING:
-    from pydantic.typing import AbstractSetIntStr, DictStrAny, MappingIntStrAny
+    from pydantic.typing import DictStrAny
 
 
 def orjson_dumps(v, *, default):
@@ -60,7 +60,7 @@ class ResponseStatus(str, Enum):
 class DefaultResponse(BaseModel):
     status: ResponseStatus
     message: str
-    data: Union[list, dict, BaseModel]
+    data: Union[list, dict, BaseModel] = None
 
 
 class PaginationModel(DefaultResponse):
