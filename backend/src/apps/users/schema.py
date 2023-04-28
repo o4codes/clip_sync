@@ -11,11 +11,11 @@ class DeviceCreateSchema(BaseModel):
 
 
 class DeviceResponseSchema(DefaultResponse):
-    data: UserModel
+    data: DeviceModel
 
 
 class PaginatedDeviceSchema(PaginationModel):
-    data: list[UserModel]
+    data: list[DeviceModel]
 
 
 class UserCreateSchema(BaseModel):

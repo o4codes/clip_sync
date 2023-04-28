@@ -1,13 +1,19 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from src.apps import users
 from src.config.middlewares.exception_handler import ExceptionHandlerMiddleware
+from src.config.settings import Settings
+
+# project wide settings
+settings = Settings()
 
 app = FastAPI(
     debug=True,
     title="ClipSync API Server",
     description="Backend Server for serving API to clip sync clients",
-    docs_url="/api/v1/docs",
-    redoc_url="/api/v1/swagger",
+    docs_url=f"/api/{settings.version}/docs",
+    redoc_url=f"/api/{settings.version}/swagger",
 )
 
 app.add_middleware(
@@ -25,3 +31,8 @@ app.add_middleware(
 @app.get(path="/ping")
 def ping():
     return {"message": "pong"}
+
+
+app.include_router(
+    users.device_router, prefix=f"/api/{settings.version}", tags=["DEVICES"]
+)

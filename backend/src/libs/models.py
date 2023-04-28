@@ -6,7 +6,7 @@ import orjson
 import pytz
 from bson import ObjectId
 from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, root_validator
 
 from .fields import PyObjectId
 
@@ -33,8 +33,8 @@ class DbModel(BaseModel):
 
     def serializable_dict(
         self,
-        include: DictStrAny = None,
-        exclude: DictStrAny = None,
+        include: "DictStrAny" = None,
+        exclude: "DictStrAny" = None,
         by_alias: bool = True,
         exclude_unset: bool = False,
         exclude_defaults: bool = False,
@@ -65,20 +65,18 @@ class DefaultResponse(BaseModel):
 
 class PaginationModel(DefaultResponse):
     total_count: int
+    total_pages: Optional[int] = None
     page: int
     size: int
-    data: list[BaseModel]
+    data: list[BaseModel] = []
 
-    @property
-    def total_pages(self) -> int:
-        if self.total_count == 0:
-            return 0
-        return (self.total_count - 1) // self.size + 1
-
-    def paginate(self) -> dict:
-        return_data = jsonable_encoder(self)
-        return_data["total_pages"] = self.total_pages
-        return return_data
+    @root_validator
+    def total_pages(cls, data: dict) -> int:
+        total_count = data.get("total_count")
+        size = data.get("size")
+        data["total_pages"] = 0
+        if total_count != 0:
+            data["total_pages"] = (total_count - 1) // size + 1
 
     class Config:
         allow_population_by_field_name = True
