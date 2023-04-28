@@ -36,3 +36,4 @@ def ping():
 app.include_router(
     users.device_router, prefix=f"/api/{settings.version}", tags=["DEVICES"]
 )
+app.include_router(users.user_router, prefix=f"/api/{settings.version}", tags=["USERS"])

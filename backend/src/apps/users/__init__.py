@@ -1,4 +1,4 @@
-from .api import device_router
+from .api import device_router, user_router
 from .constants import *
 from .models import DeviceModel, UserModel
 from .repository import DeviceRepository, UserRepository

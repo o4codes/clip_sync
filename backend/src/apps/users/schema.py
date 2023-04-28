@@ -1,7 +1,7 @@
 from typing import Union
 from pydantic import BaseModel, EmailStr, validator
 
-from src.libs import DefaultResponse, DbModel, PaginationModel
+from src.libs import DefaultResponse, DbModel, PaginationModel, utils
 from .models import DeviceModel, UserModel
 from . import validators
 
@@ -25,7 +25,7 @@ class UserCreateSchema(BaseModel):
     @validator("password")
     def validate_password(cls, value: str):
         validators.password_validator(value)
-        return value
+        return utils.get_string_hash(value)
 
 
 class BasicUserResponseSchema(DbModel):
