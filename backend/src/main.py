@@ -7,7 +7,7 @@ app = FastAPI(
     title="ClipSync API Server",
     description="Backend Server for serving API to clip sync clients",
     docs_url="/api/v1/docs",
-    redoc_url="/api/v1/swagger"
+    redoc_url="/api/v1/swagger",
 )
 
 app.add_middleware(
@@ -22,10 +22,6 @@ app.add_middleware(
 )
 
 
-@app.get(
-    path="/ping"
-)
+@app.get(path="/ping")
 def ping():
-    return {
-        "message":"pong"
-    }
+    return {"message": "pong"}

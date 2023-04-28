@@ -21,7 +21,7 @@ class PaginatedDeviceSchema(PaginationModel):
 class UserCreateSchema(BaseModel):
     email: EmailStr
     password: str
-    
+
     @validator("password")
     def validate_password(cls, value: str):
         validators.password_validator(value)

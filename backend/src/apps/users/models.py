@@ -11,6 +11,7 @@ class DeviceModel(DbModel):
     A device may either have or not have a user.
     Such cases means that the device owner doesn't have an account.
     """
+
     device_name: str
     username: str
     user_id: Optional[PyObjectId] = None
@@ -22,6 +23,7 @@ class UserModel(DbModel):
     Users can have multiple devices all linked to one another.
     Also different groups/rooms can be created for some set of devices.
     """
+
     email: EmailStr
     password: str
     subscription: Any = None

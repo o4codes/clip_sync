@@ -15,9 +15,9 @@ if TYPE_CHECKING:
 
 
 def orjson_dumps(v, *, default):
-    """rjson.dumps returns bytes, to match standard json.dumps we need to decode
-    """
+    """rjson.dumps returns bytes, to match standard json.dumps we need to decode"""
     return orjson.dumps(v, default=default).decode()
+
 
 class DbModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
@@ -30,25 +30,25 @@ class DbModel(BaseModel):
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str, datetime: lambda v: v.isoformat()}
-    
+
     def serializable_dict(
-        self, 
-        include: DictStrAny = None, 
+        self,
+        include: DictStrAny = None,
         exclude: DictStrAny = None,
         by_alias: bool = True,
-        exclude_unset: bool = False, 
+        exclude_unset: bool = False,
         exclude_defaults: bool = False,
-        exclude_none: bool = None
+        exclude_none: bool = None,
     ):
         """Return a dict which contains only serializable fields."""
         return jsonable_encoder(
-            self, 
-            include=include, 
-            exclude=exclude, 
-            by_alias=by_alias, 
+            self,
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
             exclude_unset=exclude_unset,
             exclude_defaults=exclude_defaults,
-            exclude_none=exclude_none
+            exclude_none=exclude_none,
         )
 
 
@@ -84,4 +84,3 @@ class PaginationModel(DefaultResponse):
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str, datetime: lambda v: v.isoformat()}
-
