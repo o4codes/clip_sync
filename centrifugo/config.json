@@ -1,9 +1,0 @@
-{
-  "port": 8001,
-  "token_hmac_secret_key": "fd188349-8696-41e1-b5f9-9d54024c5e0f",
-  "admin": true,
-  "admin_password": "2f624ebf-6d7c-4d7e-ae31-276ae36d65c9",
-  "admin_secret": "9f2915d2-a6f8-4c4a-8324-4d5c98958f05",
-  "api_key": "811a92f5-a6ef-4454-b15a-e9c9e14a73fd",
-  "allowed_origins": []
-}
