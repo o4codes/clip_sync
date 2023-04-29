@@ -10,6 +10,7 @@ services:
     depends_on:
       - backend
       - centrifugo
+
   backend:
     build: ./backend
     command: uvicorn src.main:app --host 0.0.0.0 --port ${BACKEND_PORT}  --reload
@@ -19,20 +20,23 @@ services:
       - ./.env
     depends_on:
       - centrifugo
+  
   centrifugo:
     container_name: centrifugo
     image: centrifugo/centrifugo:latest
-    volumes:
-      - ./centrifugo/config.json:/centrifugo/config.json
-    command: centrifugo -c config.json
+    command: centrifugo --admin
     ports:
       - "${CENTRIFUGO_PORT}:${CENTRIFUGO_PORT}"
-    env_file:
-      - ./.env
+    environment:
+      - CENTRIFUGO_PORT=${CENTRIFUGO_PORT}
+      - CENTRIFUGO_SECRET=${CENTRIFUGO_SECRET_KEY}
+      - CENTRIFUGO_ADMIN_PASSWORD=${CENTRIFUGO_ADMIN_PASSWORD}
+      - CENTRIFUGO_ADMIN_SECRET=${CENTRIFUGO_ADMIN_SECRET}
     ulimits:
       nofile:
         soft: 65535
         hard: 65535
+  
   mongo:
     image: mongo:latest
     volumes:
