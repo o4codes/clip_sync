@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 from . import exceptions
 
+
 class WebsocketEvents(str, Enum):
     DEVICE_CONNECTED = "DEVICE_CONNECTED"
     DEVICE_DISCONNECTED = "DEVICE_DISCONNECTED"
@@ -14,15 +15,15 @@ class WebsocketEvents(str, Enum):
 
 
 class WebSocketEmitter:
-    """ 
+    """
     Serves as a wrapper for interfacing with centrifugo.
     It is used to publish events to websocket connection.
     """
-    
+
     HOST = "0.0.0.0"
     PORT = config("CENTRIFUGO_PORT")
     CHANNEL_PREFIX = "$"
-    
+
     def __init__(self) -> None:
         self.address = f"https://{self.HOST}:{self.PORT}/api"
         self.api_key = config("CENTRIFUGO_API_KEY")
@@ -65,7 +66,7 @@ class WebSocketEmitter:
         Publish data into a channel.
 
         Args:
-            channel (str): The name of the channel to publish to 
+            channel (str): The name of the channel to publish to
             event (Events): Event enum obj associated with the data being published
             data (Dict[str, str]): Custom JSON data to publish into the room
 
