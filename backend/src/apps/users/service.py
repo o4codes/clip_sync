@@ -1,4 +1,3 @@
-from pydantic import BaseModel
 from src.libs import BaseService
 from . import models, schema, repository
 
