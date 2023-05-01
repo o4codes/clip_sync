@@ -17,10 +17,14 @@ class UserService(BaseService):
     data_response_klass = schema.BasicUserResponseSchema
     model_klass = models.UserModel
     unique_fields = ["email"]
-    
-    async def create(self, request_instance: schema.UserCreateSchema, **kwargs) -> schema.BasicUserResponseSchema:
-        device_info: dict = kwargs['device_info']
+
+    async def create(
+        self, request_instance: schema.UserCreateSchema, **kwargs
+    ) -> schema.BasicUserResponseSchema:
+        device_info: dict = kwargs["device_info"]
         new_user = await super().create(request_instance)
-        device_info['user_id'] = new_user.id
-        await DeviceService(self.database).create(schema.DeviceCreateSchema(**device_info))
+        device_info["user_id"] = new_user.id
+        await DeviceService(self.database).create(
+            schema.DeviceCreateSchema(**device_info)
+        )
         return new_user

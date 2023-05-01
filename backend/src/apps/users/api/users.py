@@ -1,10 +1,8 @@
-from fastapi import status, Query, Depends
-from fastapi.encoders import jsonable_encoder
+from typing import Optional
+from fastapi import status, Query, Depends, Header
 from fastapi.routing import APIRouter
-from fastapi_utils.cbv import cbv
-from fastapi_utils.inferring_router import InferringRouter
 
-from src.libs import PyObjectId, ResponseStatus
+from src.libs import PyObjectId, ResponseStatus, utils
 from src.config.dependencies.database import get_database
 from .. import schema, service
 
@@ -39,9 +37,12 @@ async def list_users(
     status_code=status.HTTP_200_OK,
 )
 async def create_user(
-    user_data: schema.UserCreateSchema, database_session=Depends(get_database)
+    user_data: schema.UserCreateSchema,
+    database_session=Depends(get_database),
+    user_agent: Optional[str] = Header(default=None),
 ):
-    user = await service.UserService(database_session).create(user_data)
+    device_info = utils.parse_user_agent(user_agent)
+    user = await service.UserService(database_session).create(user_data, device_info)
     return schema.UserResponseSchema(
         status=ResponseStatus.SUCCESS,
         message="User account successfully create",

@@ -1,4 +1,1 @@
 from enum import Enum
-
-
-    

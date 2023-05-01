@@ -1,6 +1,8 @@
 import secrets
 from datetime import datetime, timedelta
+from typing import Any
 
+import user_agents
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
@@ -62,3 +64,14 @@ def decode_access_token(token: str) -> dict:
         return payload
     except JWTError as e:
         raise exceptions.ForbiddenException(str(e))
+
+
+def parse_user_agent(user_agent_header: str) -> dict[str, Any]:
+    user_agent = user_agents.parse(user_agent_header)
+    return {
+        "operating_system": user_agent.os.family,
+        "browser": user_agent.browser.family,
+        "device_family": user_agent.device.family,
+        "device_model": user_agent.device.model,
+        "device_brand": user_agent.device.brand,
+    }

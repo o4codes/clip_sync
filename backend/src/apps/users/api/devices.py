@@ -1,8 +1,6 @@
 from typing import Optional
 from fastapi import status, Query, Depends
-from fastapi.encoders import jsonable_encoder
 from fastapi.routing import APIRouter
-from fastapi_utils.cbv import cbv
 
 from src.libs import PyObjectId, ResponseStatus
 from src.config.dependencies.database import get_database
@@ -21,9 +19,11 @@ async def list_devices(
     size: int = Query(default=10),
     page: int = Query(default=1),
     database_session=Depends(get_database),
-    user_id: Optional[str] = None
+    user_id: Optional[str] = None,
 ):
-    count, devices = await service.DeviceService(database_session).list(size, page, user_id = user_id)
+    count, devices = await service.DeviceService(database_session).list(
+        size, page, user_id=user_id
+    )
     return schema.PaginatedDeviceSchema(
         status=ResponseStatus.SUCCESS,
         message="List of devices",
