@@ -1,13 +1,27 @@
-from typing import Union
+from datetime import datetime
+from typing import Union, Optional
+
+from bson import ObjectId
 from pydantic import BaseModel, EmailStr, validator
 
-from src.libs import DefaultResponse, DbModel, PaginationModel, utils
-from .models import DeviceModel, UserModel
+
+from src.libs import DefaultResponse, DbModel, PaginationModel, utils, PyObjectId
+from .models import DeviceModel
 from . import validators
 
 
 class DeviceCreateSchema(BaseModel):
-    username: str
+    operating_system: Optional[str] = None
+    browser: Optional[str] = None
+    device_family: Optional[str] = None
+    device_model: Optional[str] = None
+    device_brand: Optional[str] = None
+    user_id: Optional[PyObjectId] = None
+    
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str, datetime: lambda v: v.isoformat()}
 
 
 class DeviceResponseSchema(DefaultResponse):

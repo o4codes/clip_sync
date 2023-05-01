@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import status, Query, Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.routing import APIRouter
@@ -20,8 +21,9 @@ async def list_devices(
     size: int = Query(default=10),
     page: int = Query(default=1),
     database_session=Depends(get_database),
+    user_id: Optional[str] = None
 ):
-    count, devices = await service.DeviceService(database_session).list(size, page)
+    count, devices = await service.DeviceService(database_session).list(size, page, user_id = user_id)
     return schema.PaginatedDeviceSchema(
         status=ResponseStatus.SUCCESS,
         message="List of devices",
@@ -29,22 +31,6 @@ async def list_devices(
         total_count=count,
         page=page,
         size=size,
-    )
-
-
-@router.post(
-    path="",
-    response_model=schema.DeviceResponseSchema,
-    status_code=status.HTTP_200_OK,
-)
-async def create_device(
-    self, device_data: schema.DeviceCreateSchema, database_session=Depends(get_database)
-):
-    device = await service.DeviceService(database_session).create(device_data)
-    return schema.DeviceResponseSchema(
-        status=ResponseStatus.SUCCESS,
-        message="Device successfully created",
-        data=device,
     )
 
 
