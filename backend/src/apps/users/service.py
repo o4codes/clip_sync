@@ -8,7 +8,7 @@ class DeviceService(BaseService):
     data_request_klass = schema.DeviceCreateSchema
     data_response_klass = models.DeviceModel
     model_klass = models.DeviceModel
-    unique_fields = ["operating_system", "device_model"]
+    unique_fields = ["operating_system", "browser", "device_family"]
 
 
 class UserService(BaseService):
