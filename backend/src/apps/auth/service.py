@@ -40,8 +40,6 @@ class AuthService:
         user = users.UserModel(**user_db)
         if not utils.verify_hash(user.password, password):
             raise exceptions.BadRequest("Invalid Password")
-        if not user.is_active:
-            raise exceptions.ForbiddenException("User has not been activated")
         user_data = jsonable_encoder(user)
         token_schema = schema.UserTokenSchema(**user_data)
         token = utils.create_access_token(data=jsonable_encoder(token_schema))
