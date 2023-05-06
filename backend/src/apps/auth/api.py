@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import Depends, Header
 from fastapi.routing import APIRouter
 
-from src.config.dependencies import get_database
+from src.config.dependencies.database import get_database
 
 from . import schema, service
 
