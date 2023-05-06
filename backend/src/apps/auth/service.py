@@ -1,3 +1,5 @@
+from typing import Any
+
 from fastapi.encoders import jsonable_encoder
 from pymongo.collection import Collection
 from pydantic import EmailStr
@@ -18,7 +20,7 @@ class AuthService:
         self.users_collection: Collection = database[self.USERS_COLLECTION_NAME]
 
     async def login(
-        self, email: EmailStr, password: str, device_info: users.DeviceCreateSchema
+        self, email: EmailStr, password: str, device_info: dict[str, Any]
     ) -> schema.UserLoginResponseSchema:
         """Logs a user in by generating token
 
@@ -41,7 +43,8 @@ class AuthService:
         if not utils.verify_hash(user.password, password):
             raise exceptions.BadRequest("Invalid Password")
         user_data = jsonable_encoder(user)
-        device = await users.DeviceService(self.database).get_create(device_info)
+        device_instance = users.DeviceCreateSchema(**device_info, user_id=user.id)
+        device = await users.DeviceService(self.database).get_create(device_instance)
         token_schema = schema.UserTokenSchema(**user_data, device_id=device.id)
         token = utils.create_access_token(data=jsonable_encoder(token_schema))
         return schema.UserLoginResponseSchema(**user_data, token=token)

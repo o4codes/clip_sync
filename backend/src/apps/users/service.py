@@ -1,3 +1,5 @@
+from fastapi.encoders import jsonable_encoder
+
 from src.libs import BaseService
 from . import models, schema, repository
 
@@ -10,8 +12,8 @@ class DeviceService(BaseService):
     unique_fields = ["operating_system", "browser", "device_family"]
 
     async def get_create(self, request_instance: schema.DeviceCreateSchema):
-        devices: list[models.DeviceModel] = await self.search(
-            many=True, **request_instance
+        devices: list[models.DeviceModel] = await self.repository.search(
+            many=True, **jsonable_encoder(request_instance, exclude_none=True)
         )
         if devices:
             return devices[0]

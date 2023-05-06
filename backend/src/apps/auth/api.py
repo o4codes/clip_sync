@@ -1,4 +1,6 @@
-from fastapi import Depends
+from typing import Optional
+
+from fastapi import Depends, Header
 from fastapi.routing import APIRouter
 
 from src.config.dependencies import get_database
@@ -11,6 +13,7 @@ router = APIRouter(prefix="/auth")
 @router.post(path="/login", response_model=schema.UserLoginResponseSchema)
 async def login_user(
     user_login_request: schema.UserLoginRequestSchema,
+    user_agent: Optional[str] = Header(default=None),
     database=Depends(get_database),
 ):
     auth_service = service.AuthService(database)
