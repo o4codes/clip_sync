@@ -41,6 +41,7 @@ class AuthService:
         if not utils.verify_hash(user.password, password):
             raise exceptions.BadRequest("Invalid Password")
         user_data = jsonable_encoder(user)
-        token_schema = schema.UserTokenSchema(**user_data)
+        device = await users.DeviceService(self.database).get_create(device_info)
+        token_schema = schema.UserTokenSchema(**user_data, device_id=device.id)
         token = utils.create_access_token(data=jsonable_encoder(token_schema))
         return schema.UserLoginResponseSchema(**user_data, token=token)

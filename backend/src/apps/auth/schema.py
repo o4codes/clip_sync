@@ -11,6 +11,7 @@ from src.libs import fields
 class UserTokenSchema(BaseModel):
     id: fields.PyObjectId = Field(alias="_id")
     email: EmailStr
+    device_id: fields.PyObjectId
     exp: Optional[datetime]
 
     class Config:

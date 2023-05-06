@@ -16,7 +16,7 @@ class DeviceCreateSchema(BaseModel):
     device_family: Optional[str] = None
     device_model: Optional[str] = None
     device_brand: Optional[str] = None
-    user_id: Optional[PyObjectId] = None
+    user_id: PyObjectId
 
     class Config:
         allow_population_by_field_name = True

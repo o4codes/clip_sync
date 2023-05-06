@@ -9,6 +9,14 @@ class DeviceService(BaseService):
     model_klass = models.DeviceModel
     unique_fields = ["operating_system", "browser", "device_family"]
 
+    async def get_create(self, request_instance: schema.DeviceCreateSchema):
+        devices: list[models.DeviceModel] = await self.search(
+            many=True, **request_instance
+        )
+        if devices:
+            return devices[0]
+        return await self.create(request_instance=request_instance)
+
 
 class UserService(BaseService):
     repository_klass = repository.UserRepository
