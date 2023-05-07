@@ -1,6 +1,7 @@
 from typing import List, Optional, Type, Union
 
 from bson import ObjectId
+from fastapi.encoders import jsonable_encoder
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from pydantic import BaseModel
 
@@ -11,7 +12,8 @@ from .repository import BaseRepository
 
 class BaseService:
     repository_klass: Type[BaseRepository]
-    data_request_klass: Type[BaseModel]
+    data_create_klass: Type[BaseModel]
+    data_transfer_klass: Type[BaseModel]
     data_response_klass: Type[BaseModel]
     model_klass: Type[DbModel]
     unique_fields: list[str]
@@ -126,7 +128,7 @@ class BaseService:
 
         Args:
             id_[ObjectId]: primary key of entity to be updated
-            update_instance [BaseModel]: update data
+            update_instance [BaseModel]: data trasfer model object
 
         Returns:
             BaseModel: updated entity
@@ -134,8 +136,7 @@ class BaseService:
         Raises:
             BadRequest: when unique data already exists in database
         """
-        if not await self.repository.get(id_):
-            raise NotFoundException(f"Object with id {id_} is not found")
+        instance = await self.get(id_)
         if self.unique_fields:
             filter_kwargs = {
                 key: getattr(update_instance, key)
@@ -147,10 +148,11 @@ class BaseService:
                 raise BadRequest(
                     "Cannot update data due to exisiting unique properties"
                 )
-        update_instance = self.model_klass(
-            **update_instance.dict(exclude_unset=True, exclude_none=True)
+        update_data = jsonable_encoder(
+            update_instance, exclude_none=True, exclude_unset=True
         )
-        db_result = await self.repository.update(id_, update_instance)
+        updated_instance = instance.copy(update_data)
+        db_result = await self.repository.update(id_, updated_instance)
         response = self.data_response_klass(**db_result.dict())
         return response
 
