@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, List, Union, TypeVar, Tuple
 
 from bson import ObjectId
 from fastapi import Depends
@@ -17,7 +17,7 @@ app_settings = Settings()
 
 class AuthDependency:
     """
-    Authentiocate a user account
+    Authenticate a user account and attach associated device
     """
 
     def __init__(self, raise_exception: bool = True):

@@ -3,8 +3,8 @@ from fastapi import status, Query, Depends, Header
 from fastapi.routing import APIRouter
 
 from src.libs import PyObjectId, ResponseStatus, utils
-from src.config.dependencies.database import get_database
-from .. import schema, service
+from src.config.dependencies import get_database, AuthDependency
+from .. import schema, service, models
 
 
 router = APIRouter(prefix="/users")
@@ -54,8 +54,12 @@ async def create_user(
     path="/{id_}",
     response_model=schema.UserResponseSchema,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(AuthDependency())],
 )
-async def get_user(id_: PyObjectId, database_session=Depends(get_database)):
+async def get_user(
+    id_: PyObjectId,
+    database_session=Depends(get_database),
+):
     user = await service.UserService(database_session).get(id_)
     return schema.UserResponseSchema(
         status=ResponseStatus.SUCCESS,

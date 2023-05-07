@@ -3,7 +3,7 @@ from fastapi import status, Query, Depends
 from fastapi.routing import APIRouter
 
 from src.libs import PyObjectId, ResponseStatus
-from src.config.dependencies.database import get_database
+from src.config.dependencies import get_database, AuthDependency
 from .. import schema, service
 
 
@@ -14,6 +14,7 @@ router = APIRouter(prefix="/devices")
     path="",
     response_model=schema.PaginatedDeviceSchema,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(AuthDependency())],
 )
 async def list_devices(
     size: int = Query(default=10),
@@ -38,6 +39,7 @@ async def list_devices(
     path="/{id_}",
     response_model=schema.DeviceResponseSchema,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(AuthDependency())],
 )
 async def get_device(id_: PyObjectId, database_session=Depends(get_database)):
     device = await service.DeviceService(database_session).get(id_)
