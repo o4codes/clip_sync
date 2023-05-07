@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import root_validator
+from pydantic import root_validator, Field
 
 from src.libs import DbModel, PyObjectId, exceptions
 
@@ -12,6 +12,7 @@ class RoomModel(DbModel):
     """
 
     name: Optional[str] = None
+    is_active: bool = Field(default=True)
     devices: list[PyObjectId]
     created_by: PyObjectId  # device id of creator
 
