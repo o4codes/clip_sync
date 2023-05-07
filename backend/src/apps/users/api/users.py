@@ -66,3 +66,22 @@ async def get_user(
         message="User acount successfully retrieved",
         data=user,
     )
+
+
+@router.patch(
+    path="/{id_}",
+    response_model=schema.UserResponseSchema,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(AuthDependency())],
+)
+async def update_user(
+    id_: PyObjectId,
+    user_data: schema.UserDTOSchema,
+    database_session=Depends(get_database),
+):
+    user = await service.UserService(database_session).update(id_, user_data)
+    return schema.UserResponseSchema(
+        status=ResponseStatus.SUCCESS,
+        message="User account update success",
+        data=user,
+    )

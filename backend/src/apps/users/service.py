@@ -6,7 +6,8 @@ from . import models, schema, repository
 
 class DeviceService(BaseService):
     repository_klass = repository.DeviceRepository
-    data_request_klass = schema.DeviceCreateSchema
+    data_create_klass = schema.DeviceCreateSchema
+    data_transfer_klass = schema.DeviceDTOSchema
     data_response_klass = models.DeviceModel
     model_klass = models.DeviceModel
     unique_fields = ["operating_system", "browser", "device_family"]
@@ -22,7 +23,8 @@ class DeviceService(BaseService):
 
 class UserService(BaseService):
     repository_klass = repository.UserRepository
-    data_request_klass = schema.UserCreateSchema
+    data_create_klass = schema.UserCreateSchema
+    data_transfer_klass = schema.UserDTOSchema
     data_response_klass = schema.BasicUserResponseSchema
     model_klass = models.UserModel
     unique_fields = ["email"]
