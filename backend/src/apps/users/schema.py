@@ -4,7 +4,6 @@ from typing import Union, Optional
 from bson import ObjectId
 from pydantic import BaseModel, EmailStr, validator
 
-
 from src.libs import DefaultResponse, DbModel, PaginationModel, utils, PyObjectId
 from .models import DeviceModel
 from . import validators
