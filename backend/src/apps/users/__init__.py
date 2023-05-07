@@ -3,9 +3,11 @@ from .constants import *
 from .models import DeviceModel, UserModel
 from .repository import DeviceRepository, UserRepository
 from .schema import (
+    DeviceDTOSchema,
     DeviceCreateSchema,
     DeviceResponseSchema,
     PaginatedDeviceSchema,
+    UserDTOSchema,
     UserCreateSchema,
     BasicUserResponseSchema,
     UserResponseSchema,

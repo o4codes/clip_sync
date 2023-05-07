@@ -28,18 +28,16 @@ class AuthDependency:
         auth: HTTPAuthorizationCredentials = Depends(security_mechanism),
         database=Depends(get_database),
     ):
-        from src.apps import users
+        from src.apps import users, auth as auth_module
 
         try:
             token = auth.credentials
             payload = utils.decode_access_token(token)
-            user: Union[users.UserResponseSchema, BaseModel] = await users.UserService(
-                database
-            ).get(ObjectId(payload.get("_id")))
-            device: users.DeviceModel = await users.DeviceService(database).get(
+            await users.UserService(database).get(ObjectId(payload.get("_id")))
+            await users.DeviceService(database).get(
                 ObjectId([payload.get("device_id")])
             )
-            return user, device
+            return auth_module.UserTokenSchema(**payload)
         except (JWTError, exceptions.NotFoundException):
             if self.raise_exception:
                 raise exceptions.UnauthorizedException("Invalid Token")

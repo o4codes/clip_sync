@@ -1,4 +1,4 @@
-import secrets
+import random, string
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -13,8 +13,20 @@ settings_lib = settings.Settings()
 pwd_context = CryptContext(schemes=[settings_lib.hash_scheme], deprecated="auto")
 
 
-def get_random_string() -> str:
-    return str(secrets.token_hex(16))
+def get_random_string(
+    length: int, allowed_chars: str = string.ascii_letters + string.digits
+) -> str:
+    """
+    Generates a random string of specified length using the provided set of characters.
+
+    Parameters:
+        length (int): The length of the random string to generate.
+        allowed_chars (str): A string containing the characters allowed in the random string.
+
+    Returns:
+        str: The generated random string.
+    """
+    return "".join(random.choice(allowed_chars) for _ in range(length))
 
 
 def get_string_hash(value: str):

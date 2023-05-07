@@ -1,5 +1,3 @@
-from typing import List, Union
-
 from bson import ObjectId
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
@@ -11,7 +9,8 @@ from . import models, schema, repository
 
 class RoomService(BaseService):
     repository_klass = repository.RoomRepository
-    data_request_klass = schema.RoomCreateSchema
+    data_create_klass = schema.RoomCreateSchema
+    data_transfer_klass = schema.RoomDTOSchema
     data_response_klass = models.RoomModel
     model_klass = models.RoomModel
     unique_fields = ["devices"]
@@ -26,7 +25,7 @@ class RoomService(BaseService):
             raise exceptions.BadRequest("Some Device Ids are not valid")
 
     async def create(
-        self, request_instance: schema.RoomCreateSchema
+        self, request_instance: schema.RoomCreateSchema, created_by: ObjectId
     ) -> models.RoomModel:
         """Creates entity into database
 
@@ -39,7 +38,9 @@ class RoomService(BaseService):
         Raises:
             BadRequest: When unique data already exists
         """
-        db_model_instance = self.model_klass(**request_instance.dict())
+        db_model_instance = self.model_klass(
+            **request_instance.dict(), created_by=created_by
+        )
         search_kwargs = {"devices": {"$all": request_instance.devices}}
         if await self.repository.search(**search_kwargs):
             raise exceptions.BadRequest(
@@ -51,7 +52,7 @@ class RoomService(BaseService):
         return response
 
     async def update(
-        self, id_: ObjectId, update_instance: schema.RoomCreateSchema
+        self, id_: ObjectId, update_instance: schema.RoomDTOSchema
     ) -> BaseModel:
         """Updates entity data in database
 

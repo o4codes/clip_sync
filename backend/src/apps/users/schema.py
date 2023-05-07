@@ -47,7 +47,7 @@ class UserDTOSchema(BaseModel):
         return utils.get_string_hash(value)
 
 
-class UserCreateSchema(BaseModel):
+class UserCreateSchema(UserDTOSchema):
     email: EmailStr
     password: str
 

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.apps import users, auth
+from src.apps import users, auth, rooms
 from src.config.middlewares.exception_handler import ExceptionHandlerMiddleware
 from src.config.settings import Settings
 
@@ -38,3 +38,4 @@ app.include_router(
     users.device_router, prefix=f"/api/{settings.version}", tags=["DEVICES"]
 )
 app.include_router(users.user_router, prefix=f"/api/{settings.version}", tags=["USERS"])
+app.include_router(rooms.router, prefix=f"/api/{settings.version}", tags=["ROOMS"])

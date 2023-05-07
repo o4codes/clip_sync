@@ -2,7 +2,13 @@ from typing import Optional
 
 from pydantic import root_validator, Field
 
-from src.libs import DbModel, PyObjectId, exceptions
+from src.libs import DbModel, PyObjectId, exceptions, utils
+
+from . import constants
+
+
+def generate_invite_code():
+    return f"{constants.ROOM_INVITE_PREFIX}-{utils.get_random_string(length=6)}"
 
 
 class RoomModel(DbModel):
@@ -12,6 +18,7 @@ class RoomModel(DbModel):
     """
 
     name: Optional[str] = None
+    invitation_code: str = Field(default_factory=generate_invite_code)
     is_active: bool = Field(default=True)
     devices: list[PyObjectId]
     created_by: PyObjectId  # device id of creator
