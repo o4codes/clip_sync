@@ -39,4 +39,6 @@ app.include_router(
 )
 app.include_router(users.user_router, prefix=f"/api/{settings.version}", tags=["USERS"])
 app.include_router(rooms.room_router, prefix=f"/api/{settings.version}", tags=["ROOMS"])
-app.include_router(rooms.session_router, prefix=f"/api/{settings.version}", tags=["SESSION"])
+app.include_router(
+    rooms.session_router, prefix=f"/api/{settings.version}", tags=["SESSION"]
+)
