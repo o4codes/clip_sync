@@ -14,14 +14,12 @@ if TYPE_CHECKING:
 router = APIRouter(prefix="/rooms")
 
 
-router.get(
+@router.get(
     path="",
     response_model=schema.PaginatedRoomSchema,
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(AuthDependency())],
 )
-
-
 async def list_rooms(
     size: int = Query(default=10),
     page: int = Query(default=1),
