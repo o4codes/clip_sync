@@ -10,13 +10,14 @@ class Cache:
     REDIS_USER = "user"
     EXPIRY_DURATION = timedelta(minutes=30)
 
-    async def _get_redis_instance(self):
+    @classmethod
+    async def _get_redis_instance(cls):
         return await aioredis.from_url(
-            self.REDIS_URL, username=self.REDIS_USER, password=self.REDIS_PASSWORD
+            cls.REDIS_URL, username=cls.REDIS_USER, password=cls.REDIS_PASSWORD
         )
 
     @classmethod
-    def _datetime_parser(dct: dict):
+    def __datetime_parser(cls, dct: dict):
         for k, v in dct.items():
             if isinstance(v, str) and v.endswith("+00:00"):
                 try:
@@ -25,20 +26,23 @@ class Cache:
                     pass
         return dct
 
-    async def get_cache(self, key: str):
-        redis = await self._get_redis_instance()
+    @classmethod
+    def __serialize_dates(cls, v):
+        return v.isoformat() if isinstance(v, datetime) else v
+
+    @classmethod
+    async def get_cache(cls, key: str):
+        redis = await cls._get_redis_instance()
         current_hour_stats = await redis.get(key)
 
         if current_hour_stats:
-            return json.loads(current_hour_stats, object_hook=self._datetime_parser)
+            return json.loads(current_hour_stats, object_hook=cls.__datetime_parser)
 
-    async def set_cache(self, data, key: str):
-        def serialize_dates(v):
-            return v.isoformat() if isinstance(v, datetime) else v
-
-        redis = await self._get_redis_instance()
+    @classmethod
+    async def set_cache(cls, data, key: str):
+        redis = await cls._get_redis_instance()
         await redis.set(
             key,
-            json.dumps(data, default=serialize_dates),
-            ex=self.EXPIRY_DURATION,
+            json.dumps(data, default=cls.__serialize_dates),
+            ex=cls.EXPIRY_DURATION,
         )
