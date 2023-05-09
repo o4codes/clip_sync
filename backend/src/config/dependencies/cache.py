@@ -31,7 +31,7 @@ class Cache:
         return v.isoformat() if isinstance(v, datetime) else v
 
     @classmethod
-    async def get_cache(cls, key: str):
+    async def get(cls, key: str):
         redis = await cls._get_redis_instance()
         current_hour_stats = await redis.get(key)
 
@@ -39,10 +39,15 @@ class Cache:
             return json.loads(current_hour_stats, object_hook=cls.__datetime_parser)
 
     @classmethod
-    async def set_cache(cls, data, key: str):
+    async def set(cls, data, key: str):
         redis = await cls._get_redis_instance()
         await redis.set(
             key,
             json.dumps(data, default=cls.__serialize_dates),
             ex=cls.EXPIRY_DURATION,
         )
+
+    @classmethod
+    async def rmeove(cls, key: str):
+        redis = await cls._get_redis_instance()
+        await redis.delete(key)
