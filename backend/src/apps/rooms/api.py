@@ -1,10 +1,13 @@
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from fastapi import status, Query, Depends, Body
 from fastapi.routing import APIRouter
 
 from src.libs import PyObjectId, ResponseStatus, exceptions
 from src.config.dependencies import get_database, AuthDependency
 from . import schema, service, models
+
+if TYPE_CHECKING:
+    from src.apps.auth import UserTokenSchema
 
 router = APIRouter(prefix="/rooms")
 
@@ -20,9 +23,9 @@ router.get(
 async def list_rooms(
     size: int = Query(default=10),
     page: int = Query(default=1),
-    database_session=Depends(get_database),
+    db_session=Depends(get_database),
 ):
-    count, rooms = await service.RoomService(database_session).list(size, page)
+    count, rooms = await service.RoomService(db_session).list(size, page)
     return schema.PaginatedRoomSchema(
         status=ResponseStatus.SUCCESS,
         message="List of rooms",
@@ -40,10 +43,10 @@ async def list_rooms(
 )
 async def create_room(
     room_data: schema.RoomCreateSchema,
-    database_session=Depends(get_database),
-    auth=Depends(AuthDependency()),
+    db_session=Depends(get_database),
+    auth: 'UserTokenSchema' = Depends(AuthDependency()),
 ):
-    room = await service.RoomService(database_session).create(room_data, auth.device_id)
+    room = await service.RoomService(db_session).create(room_data, auth.device_id)
     return schema.RoomResponseSchema(
         status=ResponseStatus.SUCCESS,
         message="Room successfully created",
@@ -59,9 +62,9 @@ async def create_room(
 )
 async def get_room(
     id_: PyObjectId,
-    database_session=Depends(get_database),
+    db_session=Depends(get_database),
 ):
-    room = await service.RoomService(database_session).get(id_)
+    room = await service.RoomService(db_session).get(id_)
     return schema.RoomResponseSchema(
         status=ResponseStatus.SUCCESS,
         message="Room Succesfully Retrieved",
@@ -78,9 +81,9 @@ async def get_room(
 async def update_room(
     id_: PyObjectId,
     room_data: schema.RoomDTOSchema,
-    database_session=Depends(get_database),
+    db_session=Depends(get_database),
 ):
-    room = await service.RoomService(database_session).update(id_, room_data)
+    room = await service.RoomService(db_session).update(id_, room_data)
     return schema.RoomResponseSchema(
         status=ResponseStatus.SUCCESS,
         message="Room update success",
@@ -94,15 +97,35 @@ async def update_room(
 )
 async def delete_room(
     id_: PyObjectId,
-    database_session=Depends(get_database),
-    auth=Depends(AuthDependency()),
+    db_session=Depends(get_database),
+    auth: 'UserTokenSchema'=Depends(AuthDependency()),
 ):
-    room_service = service.RoomService(database_session)
+    room_service = service.RoomService(db_session)
     room = await room_service.get(id_)
     if room.created_by != auth.device_id:
         raise exceptions.ForbiddenException("Cannot delete room")
     await room_service.delete(id_)
     return None
+
+
+@router.post(
+    path="/join",
+    response_model=schema.RoomResponseSchema,
+    status_code=status.HTTP_200_OK,
+)
+async def join_room(
+    invitation_data: schema.RoomJoinInvitationSchema,
+    db_session=Depends(get_database),
+    auth: 'UserTokenSchema'=Depends(AuthDependency()),
+):
+    room = await service.RoomService(db_session).join_room(
+        invitation_data.invitation_code , auth.device_id
+    )
+    return schema.RoomResponseSchema(
+        status=ResponseStatus.SUCCESS,
+        message="Room Join success",
+        data=room,
+    )
 
 
 @router.patch(
@@ -114,9 +137,9 @@ async def delete_room(
 async def add_devices(
     id_: PyObjectId,
     devices_data: schema.DeviceRemoveAddSchema,
-    database_session=Depends(get_database),
+    db_session=Depends(get_database),
 ):
-    room = await service.RoomService(database_session).add_devices(
+    room = await service.RoomService(db_session).add_devices(
         id_, devices_data.devices
     )
     return schema.RoomResponseSchema(
@@ -135,9 +158,9 @@ async def add_devices(
 async def remove_devices(
     id_: PyObjectId,
     devices_data: schema.DeviceRemoveAddSchema,
-    database_session=Depends(get_database),
+    db_session=Depends(get_database),
 ):
-    room = await service.RoomService(database_session).remove_devices(
+    room = await service.RoomService(db_session).remove_devices(
         id_, devices_data.devices
     )
     return schema.RoomResponseSchema(

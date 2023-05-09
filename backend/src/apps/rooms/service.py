@@ -47,8 +47,8 @@ class RoomService(BaseService):
                 "Cannot create room, due to existence of room containing exact members"
             )
         self.__validate_devices(request_instance.devices)
-        db_result = await self.repository.create(db_model_instance)
-        response = self.data_response_klass(**db_result.dict())
+        created_room = await self.repository.create(db_model_instance)
+        response = self.data_response_klass(**jsonable_encoder(created_room))
         return response
 
     async def update(
@@ -77,8 +77,8 @@ class RoomService(BaseService):
         )
         updated_room = room.copy(update_data)
         self.__validate_devices(updated_room.devices)
-        db_result = await self.repository.update(id_, updated_room)
-        response = self.data_response_klass(**jsonable_encoder(db_result))
+        updated_room = await self.repository.update(id_, updated_room)
+        response = self.data_response_klass(**jsonable_encoder(updated_room))
         return response
 
     async def add_devices(self, id_: ObjectId, devices: list[ObjectId]):
@@ -90,8 +90,8 @@ class RoomService(BaseService):
         self.__validate_devices(devices)
         room: models.RoomModel = await self.get(id_)
         room.devices.extend(devices)
-        db_result = await self.repository.update(id_, room)
-        response = self.data_response_klass(**jsonable_encoder(db_result))
+        updated_room = await self.repository.update(id_, room)
+        response = self.data_response_klass(**jsonable_encoder(updated_room))
         return response
 
     async def remove_devices(self, id_: ObjectId, devices: list[ObjectId]):
@@ -103,6 +103,23 @@ class RoomService(BaseService):
         self.__validate_devices(devices)
         room: models.RoomModel = await self.get(id_)
         room.devices = [device for device in room.devices if device not in devices]
-        db_result = await self.repository.update(id_, room)
-        response = self.data_response_klass(**jsonable_encoder(db_result))
+        updated_room = await self.repository.update(id_, room)
+        response = self.data_response_klass(**jsonable_encoder(updated_room))
+        return response
+    
+    
+    async def join_room(self, invitation_code: str, device_id: ObjectId):
+        """_summary_
+
+        Args:
+            invitation_code (str): room invitation code
+            device (ObjectId): logged in device requesting to join
+        """
+        self.__validate_devices(devices=[device_id])
+        room: models.RoomModel = await self.search(invitation_code=invitation_code)
+        if device_id in room.devices:
+            raise exceptions.BadRequest("Device already present in connection")
+        room.devices.append(device_id)
+        updated_room = await self.repository.update(room.id, room)
+        response = self.data_response_klass(**jsonable_encoder(updated_room))
         return response
