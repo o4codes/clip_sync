@@ -1,10 +1,12 @@
 from typing import Optional, TYPE_CHECKING
-from fastapi import status, Query, Depends, Body
+from fastapi import status, Query, Depends
 from fastapi.routing import APIRouter
+from fastapi.responses import StreamingResponse
 
 from src.libs import PyObjectId, ResponseStatus, exceptions
 from src.config.dependencies import get_database, AuthDependency
 from . import schema, service, models
+from .libs import QRCodeGenerator
 
 if TYPE_CHECKING:
     from src.apps.auth import UserTokenSchema
@@ -44,7 +46,7 @@ async def list_rooms(
 async def create_room(
     room_data: schema.RoomCreateSchema,
     db_session=Depends(get_database),
-    auth: 'UserTokenSchema' = Depends(AuthDependency()),
+    auth: "UserTokenSchema" = Depends(AuthDependency()),
 ):
     room = await service.RoomService(db_session).create(room_data, auth.device_id)
     return schema.RoomResponseSchema(
@@ -98,7 +100,7 @@ async def update_room(
 async def delete_room(
     id_: PyObjectId,
     db_session=Depends(get_database),
-    auth: 'UserTokenSchema'=Depends(AuthDependency()),
+    auth: "UserTokenSchema" = Depends(AuthDependency()),
 ):
     room_service = service.RoomService(db_session)
     room = await room_service.get(id_)
@@ -106,6 +108,24 @@ async def delete_room(
         raise exceptions.ForbiddenException("Cannot delete room")
     await room_service.delete(id_)
     return None
+
+
+@router.get(
+    path="/{id_}/qrcode",
+    status_code=status.HTTP_200_OK,
+    response_class=StreamingResponse,
+)
+async def get_room_qrcode(
+    id_: PyObjectId,
+    db_session=Depends(get_database),
+    auth: "UserTokenSchema" = Depends(AuthDependency()),
+):
+    room_service = service.RoomService(db_session)
+    room: models.RoomModel = await room_service.get(id_)
+    if room.created_by != auth.device_id:
+        raise exceptions.ForbiddenException("Cannot create room qrcode")
+    qr_bytes = QRCodeGenerator(encode_data=room.invitation_code).make()
+    return StreamingResponse(qr_bytes, media_type="image/png")
 
 
 @router.post(
@@ -116,10 +136,10 @@ async def delete_room(
 async def join_room(
     invitation_data: schema.RoomJoinInvitationSchema,
     db_session=Depends(get_database),
-    auth: 'UserTokenSchema'=Depends(AuthDependency()),
+    auth: "UserTokenSchema" = Depends(AuthDependency()),
 ):
     room = await service.RoomService(db_session).join_room(
-        invitation_data.invitation_code , auth.device_id
+        invitation_data.invitation_code, auth.device_id
     )
     return schema.RoomResponseSchema(
         status=ResponseStatus.SUCCESS,
@@ -139,9 +159,7 @@ async def add_devices(
     devices_data: schema.DeviceRemoveAddSchema,
     db_session=Depends(get_database),
 ):
-    room = await service.RoomService(db_session).add_devices(
-        id_, devices_data.devices
-    )
+    room = await service.RoomService(db_session).add_devices(id_, devices_data.devices)
     return schema.RoomResponseSchema(
         status=ResponseStatus.SUCCESS,
         message="Devices add success",

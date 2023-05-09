@@ -106,8 +106,7 @@ class RoomService(BaseService):
         updated_room = await self.repository.update(id_, room)
         response = self.data_response_klass(**jsonable_encoder(updated_room))
         return response
-    
-    
+
     async def join_room(self, invitation_code: str, device_id: ObjectId):
         """_summary_
 
