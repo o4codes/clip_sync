@@ -1,1 +1,1 @@
-from qr_code_generator import QRCodeGenerator
+from .qr_code_generator import QRCodeGenerator

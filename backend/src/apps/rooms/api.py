@@ -1,4 +1,4 @@
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Annotated
 from fastapi import status, Query, Depends
 from fastapi.routing import APIRouter
 from fastapi.responses import StreamingResponse
@@ -9,7 +9,7 @@ from . import schema, service, models
 from .libs import QRCodeGenerator
 
 if TYPE_CHECKING:
-    from src.apps.auth import UserTokenSchema
+    from src.apps.auth.schema import UserTokenSchema
 
 router = APIRouter(prefix="/rooms")
 
@@ -46,7 +46,7 @@ async def list_rooms(
 async def create_room(
     room_data: schema.RoomCreateSchema,
     db_session=Depends(get_database),
-    auth: "UserTokenSchema" = Depends(AuthDependency()),
+    auth=Annotated["UserTokenSchema", Depends(AuthDependency())],
 ):
     room = await service.RoomService(db_session).create(room_data, auth.device_id)
     return schema.RoomResponseSchema(
@@ -100,7 +100,7 @@ async def update_room(
 async def delete_room(
     id_: PyObjectId,
     db_session=Depends(get_database),
-    auth: "UserTokenSchema" = Depends(AuthDependency()),
+    auth=Annotated["UserTokenSchema", Depends(AuthDependency())],
 ):
     room_service = service.RoomService(db_session)
     room = await room_service.get(id_)
@@ -118,7 +118,7 @@ async def delete_room(
 async def get_room_qrcode(
     id_: PyObjectId,
     db_session=Depends(get_database),
-    auth: "UserTokenSchema" = Depends(AuthDependency()),
+    auth=Annotated["UserTokenSchema", Depends(AuthDependency())],
 ):
     room_service = service.RoomService(db_session)
     room: models.RoomModel = await room_service.get(id_)
@@ -136,15 +136,34 @@ async def get_room_qrcode(
 async def join_room(
     invitation_data: schema.RoomJoinInvitationSchema,
     db_session=Depends(get_database),
-    auth: "UserTokenSchema" = Depends(AuthDependency()),
+    auth=Annotated["UserTokenSchema", Depends(AuthDependency())],
 ):
-    room = await service.RoomService(db_session).join_room(
+    updated_room = await service.RoomService(db_session).join_room(
         invitation_data.invitation_code, auth.device_id
     )
     return schema.RoomResponseSchema(
         status=ResponseStatus.SUCCESS,
         message="Room Join success",
-        data=room,
+        data=updated_room,
+    )
+
+
+@router.post(
+    path="{id_}/leave",
+    response_model=schema.RoomResponseSchema,
+    status_code=status.HTTP_200_OK,
+)
+async def leave_room(
+    id_: PyObjectId,
+    db_session=Depends(get_database),
+    auth=Annotated[Optional["UserTokenSchema"], Depends(AuthDependency())],
+):
+    room_service = service.RoomService(db_session)
+    updated_room = await room_service.leave_room(id_, auth.device_id)
+    return schema.RoomResponseSchema(
+        status=ResponseStatus.SUCCESS,
+        message="Room Leave Success",
+        data=updated_room,
     )
 
 
@@ -152,18 +171,20 @@ async def join_room(
     path="/{id_}/devices/add",
     response_model=schema.RoomResponseSchema,
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(AuthDependency())],
 )
 async def add_devices(
     id_: PyObjectId,
     devices_data: schema.DeviceRemoveAddSchema,
     db_session=Depends(get_database),
+    auth=Annotated["UserTokenSchema", Depends(AuthDependency())],
 ):
-    room = await service.RoomService(db_session).add_devices(id_, devices_data.devices)
+    updated_room = await service.RoomService(db_session).add_devices(
+        id_, devices_data.devices, user_device=auth.device_id
+    )
     return schema.RoomResponseSchema(
         status=ResponseStatus.SUCCESS,
         message="Devices add success",
-        data=room,
+        data=updated_room,
     )
 
 
@@ -171,18 +192,18 @@ async def add_devices(
     path="/{id_}/devices/remove",
     response_model=schema.RoomResponseSchema,
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(AuthDependency())],
 )
 async def remove_devices(
     id_: PyObjectId,
     devices_data: schema.DeviceRemoveAddSchema,
     db_session=Depends(get_database),
+    auth=Annotated["UserTokenSchema", Depends(AuthDependency())],
 ):
-    room = await service.RoomService(db_session).remove_devices(
-        id_, devices_data.devices
+    updated_room = await service.RoomService(db_session).remove_devices(
+        id_, devices_data.devices, user_device=auth.device_id
     )
     return schema.RoomResponseSchema(
         status=ResponseStatus.SUCCESS,
         message="Devices removal success",
-        data=room,
+        data=updated_room,
     )

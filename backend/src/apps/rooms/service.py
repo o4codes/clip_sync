@@ -81,7 +81,9 @@ class RoomService(BaseService):
         response = self.data_response_klass(**jsonable_encoder(updated_room))
         return response
 
-    async def add_devices(self, id_: ObjectId, devices: list[ObjectId]):
+    async def add_devices(
+        self, id_: ObjectId, devices: list[ObjectId], user_device: ObjectId
+    ):
         """Adds devices to room
 
         Args:
@@ -89,12 +91,16 @@ class RoomService(BaseService):
         """
         self.__validate_devices(devices)
         room: models.RoomModel = await self.get(id_)
+        if room.created_by != user_device:
+            raise exceptions.BadRequest("Inadequate permission to add device")
         room.devices.extend(devices)
         updated_room = await self.repository.update(id_, room)
         response = self.data_response_klass(**jsonable_encoder(updated_room))
         return response
 
-    async def remove_devices(self, id_: ObjectId, devices: list[ObjectId]):
+    async def remove_devices(
+        self, id_: ObjectId, devices: list[ObjectId], user_device: ObjectId
+    ):
         """Adds devices to room
 
         Args:
@@ -102,13 +108,15 @@ class RoomService(BaseService):
         """
         self.__validate_devices(devices)
         room: models.RoomModel = await self.get(id_)
+        if room.created_by != user_device:
+            raise exceptions.BadRequest("Inadequate permission to remove device")
         room.devices = [device for device in room.devices if device not in devices]
         updated_room = await self.repository.update(id_, room)
         response = self.data_response_klass(**jsonable_encoder(updated_room))
         return response
 
     async def join_room(self, invitation_code: str, device_id: ObjectId):
-        """_summary_
+        """Join a room
 
         Args:
             invitation_code (str): room invitation code
@@ -119,6 +127,20 @@ class RoomService(BaseService):
         if device_id in room.devices:
             raise exceptions.BadRequest("Device already present in connection")
         room.devices.append(device_id)
+        updated_room = await self.repository.update(room.id, room)
+        response = self.data_response_klass(**jsonable_encoder(updated_room))
+        return response
+
+    async def leave_room(self, id_: ObjectId, device_id: ObjectId):
+        """leave room
+
+        Args:
+            device (ObjectId): logged in device requesting to leave
+        """
+        room: models.RoomModel = await self.get(id_)
+        if device_id not in room.devices:
+            raise exceptions.BadRequest("Device is not present in room")
+        room.devices.remove(device_id)
         updated_room = await self.repository.update(room.id, room)
         response = self.data_response_klass(**jsonable_encoder(updated_room))
         return response
