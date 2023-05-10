@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Optional, TYPE_CHECKING, Annotated, TypedDict
 
 from bson import ObjectId
-from fastapi import status, Query, Depends, Cookie
+from fastapi import File, UploadFile, status, Form
 from fastapi.routing import APIRouter
 from fastapi.requests import Request
 from fastapi.responses import StreamingResponse, JSONResponse
@@ -113,3 +113,20 @@ async def get_session_qrcode(request: Request):
         raise exceptions.ForbiddenException("Inadequate permission to get QR code")
     qr_bytes = QRCodeGenerator(encode_data=session_data.get("invite_code"))
     return StreamingResponse(qr_bytes, media_type="image/png")
+
+
+@router.get(path="/message", response_class=JSONResponse)
+async def send_message(
+    request: Request,
+    text: Optional[str] = Form(default=None, description="Text Message"),
+    media: Optional[UploadFile] = File(default=None, description="Media Message"),
+):
+    room_session: Optional[str] = request.cookies.get(ROOM_SESSION_KEY)
+    session_data: RoomSessionDict = await _get_client_session(room_session)
+    if not session_data:
+        raise exceptions.BadRequest("User is not in a session")
+    user_id = request.cookies.get(USER_ID_KEY)
+    if len(list(filter(lambda bool: (text, media)))) != 1:
+        raise exceptions.BadRequest("Only one of text or media is required")
+    # send message
+    return JSONResponse(content={"status": "SUCCESS", "message": "Message sent"})
