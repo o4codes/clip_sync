@@ -4,18 +4,19 @@ A session is a room, for unregistered users.
 A user can create or be connected one session at a time
 """
 import json
-from datetime import datetime
-from typing import Optional, TYPE_CHECKING, Annotated, TypedDict
+from datetime import datetime, timezone
+from typing import Optional, TypedDict
 
+import pytz
 from bson import ObjectId
 from fastapi import File, UploadFile, status, Form
 from fastapi.routing import APIRouter
 from fastapi.requests import Request
 from fastapi.responses import StreamingResponse, JSONResponse
-from pydantic import BaseModel
+from starlette.background import BackgroundTasks
 
 from src.config.dependencies import Cache
-from src.libs import exceptions, utils
+from src.libs import exceptions, utils, websocket_emitter, WebsocketEvents
 from .. import schema, constants
 from ..libs import QRCodeGenerator
 
@@ -51,14 +52,24 @@ async def create_session(request: Request):
     session_data = RoomSessionDict(
         room_id=room_id, invite_code=invite_code, created_by=user_id
     )
+    tasks = BackgroundTasks()
+    tasks.add_task(
+        websocket_emitter.publish,
+        channel=session_data.get("room_id"),
+        event=WebsocketEvents.ROOM_CREATED,
+        data=session_data,
+    )
+    expires_dt = datetime.now() + Cache.EXPIRY_DURATION
     response = JSONResponse(content={"status": "SUCCESS", "data": session_data})
     response.set_cookie(
         key=ROOM_SESSION_KEY,
         value=json.dumps(session_data),
-        expires=datetime.now() + Cache.EXPIRY_DURATION,
+        expires=expires_dt.astimezone(timezone.utc),
     )
     response.set_cookie(
-        key=USER_ID_KEY, value=user_id, expires=datetime.now() + Cache.EXPIRY_DURATION
+        key=USER_ID_KEY,
+        value=user_id,
+        expires=expires_dt.astimezone(timezone.utc),
     )
     await Cache.set(session_data, session_data.get("invite_code"))
     return response
@@ -79,10 +90,12 @@ async def join_session(
     response.set_cookie(
         key=ROOM_SESSION_KEY,
         value=json.dumps(session_data),
-        expires=datetime.now() + Cache.EXPIRY_DURATION,
+        expires=datetime.utcnow() + Cache.EXPIRY_DURATION,
     )
     response.set_cookie(
-        key=USER_ID_KEY, value=user_id, expires=datetime.now() + Cache.EXPIRY_DURATION
+        key=USER_ID_KEY,
+        value=user_id,
+        expires=datetime.utcnow() + Cache.EXPIRY_DURATION,
     )
     await Cache.set(session_data, session_data.get("invite_code"))
     return response
