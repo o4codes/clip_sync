@@ -11,7 +11,9 @@ class Cache:
 
     @classmethod
     def _get_redis_instance(cls):
-        return aioredis.from_url(url=f"{cls.REDIS_HOST}:{cls.REDIS_PORT}", )
+        return aioredis.from_url(
+            url=f"{cls.REDIS_HOST}:{cls.REDIS_PORT}",
+        )
 
     @classmethod
     def __datetime_parser(cls, dct: dict):
