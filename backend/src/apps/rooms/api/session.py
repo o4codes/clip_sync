@@ -124,7 +124,7 @@ async def get_session_qrcode(request: Request):
     user_id = request.cookies.get(USER_ID_KEY)
     if session_data.get("created_by") != user_id:
         raise exceptions.ForbiddenException("Inadequate permission to get QR code")
-    qr_bytes = QRCodeGenerator(encode_data=session_data.get("invite_code"))
+    qr_bytes = QRCodeGenerator(encode_data=session_data.get("invite_code")).make()
     return StreamingResponse(qr_bytes, media_type="image/png")
 
 

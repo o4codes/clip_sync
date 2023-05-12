@@ -25,6 +25,6 @@ class QRCodeGenerator:
             fill_color=self._fill_color, back_color=self._back_color
         )
         byte_io = io.BytesIO()
-        qr_image.save(byte_io, format=self._output_format)
+        qr_image.save(byte_io)
         byte_io.seek(0)
         return byte_io
