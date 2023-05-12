@@ -42,7 +42,7 @@ services:
   mongo:
     image: mongo:latest
     volumes:
-      - mongo_data:/data/db
+      - mongo_data:/mongo/db
     env_file:
       - ./.env
     ports:
@@ -51,14 +51,16 @@ services:
   cache:
     image: redis:latest
     restart: always
+    command: redis-server --port ${REDIS_PORT}
     ports:
-      - "${REDIS_PORT}:6379"
+      - "${REDIS_PORT}:${REDIS_PORT}"
     volumes: 
-      - cache:/data
+      - cache_data:/redis/db
     environment:
       - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
 
 volumes:
   mongo_data:
-  cache:
+    driver: local
+  cache_data:
+    driver: local

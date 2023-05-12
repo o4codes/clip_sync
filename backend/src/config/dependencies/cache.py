@@ -5,15 +5,13 @@ import aioredis, json
 
 
 class Cache:
-    REDIS_HOST = "localhost"
+    REDIS_HOST = "redis://redis"
     REDIS_PORT = config("REDIS_PORT")
-    REDIS_PASSWORD = config("REDIS_PASSWORD")
-    REDIS_USER = "user"
     EXPIRY_DURATION = timedelta(minutes=30)
 
     @classmethod
-    async def _get_redis_instance(cls):
-        return aioredis.Redis(port=cls.REDIS_PORT)
+    def _get_redis_instance(cls):
+        return aioredis.from_url(url=f"{cls.REDIS_HOST}:{cls.REDIS_PORT}", )
 
     @classmethod
     def __datetime_parser(cls, dct: dict):
@@ -31,7 +29,7 @@ class Cache:
 
     @classmethod
     async def get(cls, key: str):
-        redis = await aioredis.from_url(f"{cls.REDIS_HOST}:{cls.REDIS_PORT}")
+        redis = cls._get_redis_instance()
         current_hour_stats = await redis.get(key)
 
         if current_hour_stats:
@@ -39,7 +37,7 @@ class Cache:
 
     @classmethod
     async def set(cls, data, key: str):
-        redis = await cls._get_redis_instance()
+        redis = cls._get_redis_instance()
         await redis.set(
             key,
             json.dumps(data, default=cls.__serialize_dates),
