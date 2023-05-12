@@ -5,7 +5,7 @@ import aioredis, json
 
 
 class Cache:
-    REDIS_HOST = "redis://redis"
+    REDIS_HOST = f"redis://{config('REDIS_HOST')}"
     REDIS_PORT = config("REDIS_PORT")
     EXPIRY_DURATION = timedelta(minutes=30)
 
