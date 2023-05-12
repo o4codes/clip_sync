@@ -24,7 +24,7 @@ class WebSocketEmitter:
     It is used to publish events to websocket connection.
     """
 
-    HOST = "0.0.0.0"
+    HOST = "centrifugo"
     PORT = config("CENTRIFUGO_PORT")
     CHANNEL_PREFIX = "$"
 
@@ -77,10 +77,7 @@ class WebSocketEmitter:
         Returns:
             Dict[str, Any]: The formatted response after executing the command sent
         """
-        data_publish = {
-            "event": event.value,
-            "data": data,
-        }
+        data_publish = {"event": event.value, "data": data}
 
         socket_data = {
             "method": "publish",
@@ -91,7 +88,7 @@ class WebSocketEmitter:
         }
         try:
             response = await self._send_command(socket_data)
-        except httpx.RequestError:
+        except httpx.RequestError as error:
             raise exceptions.InternalServerException("Error on websocket publish")
         else:
             if response and response.get("status_code") == 200:

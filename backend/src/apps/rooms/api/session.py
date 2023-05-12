@@ -60,7 +60,9 @@ async def create_session(request: Request):
         data=session_data,
     )
     expires_dt = datetime.now() + Cache.EXPIRY_DURATION
-    response = JSONResponse(content={"status": "SUCCESS", "data": session_data})
+    response = JSONResponse(
+        content={"status": "SUCCESS", "data": session_data}, background=tasks
+    )
     response.set_cookie(
         key=ROOM_SESSION_KEY,
         value=json.dumps(session_data),

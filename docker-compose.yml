@@ -13,6 +13,7 @@ services:
 
   backend:
     build: ./backend
+    restart: always
     command: uvicorn src.main:app --host 0.0.0.0 --port ${BACKEND_PORT}  --reload
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
@@ -34,6 +35,7 @@ services:
       - CENTRIFUGO_SECRET=${CENTRIFUGO_SECRET_KEY}
       - CENTRIFUGO_ADMIN_PASSWORD=${CENTRIFUGO_ADMIN_PASSWORD}
       - CENTRIFUGO_ADMIN_SECRET=${CENTRIFUGO_ADMIN_SECRET}
+      - CENTRIFUGO_API_KEY=${CENTRIFUGO_API_KEY}
     ulimits:
       nofile:
         soft: 65535
