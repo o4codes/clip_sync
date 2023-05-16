@@ -7,9 +7,12 @@ services:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
     env_file:
       - ./.env
+    volumes:
+      - ./frontend:/frontend
     depends_on:
       - backend
       - centrifugo
+    restart: on-failure
 
   backend:
     build: ./backend
@@ -36,6 +39,7 @@ services:
       - CENTRIFUGO_ADMIN_PASSWORD=${CENTRIFUGO_ADMIN_PASSWORD}
       - CENTRIFUGO_ADMIN_SECRET=${CENTRIFUGO_ADMIN_SECRET}
       - CENTRIFUGO_API_KEY=${CENTRIFUGO_API_KEY}
+      - CHOKIDAR_USEPOLLING=true
     ulimits:
       nofile:
         soft: 65535
