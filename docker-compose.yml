@@ -18,6 +18,9 @@ services:
     build: ./backend
     restart: always
     command: uvicorn src.main:app --host 0.0.0.0 --port ${BACKEND_PORT}  --reload
+    volumes:
+      - ./backend:/backend
+    working_dir: /backend
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
     env_file:
