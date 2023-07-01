@@ -33,7 +33,7 @@ services:
   centrifugo:
     container_name: centrifugo
     image: centrifugo/centrifugo:latest
-    command: centrifugo --admin
+    command: centrifugo --admin --health --swagger --prometheus
     ports:
       - "${CENTRIFUGO_PORT}:${CENTRIFUGO_PORT}"
     environment:
@@ -42,6 +42,9 @@ services:
       - CENTRIFUGO_ADMIN_PASSWORD=${CENTRIFUGO_ADMIN_PASSWORD}
       - CENTRIFUGO_ADMIN_SECRET=${CENTRIFUGO_ADMIN_SECRET}
       - CENTRIFUGO_API_KEY=${CENTRIFUGO_API_KEY}
+      - CENTRIFUGO_DEBUG=${CENTRIFUGO_DEBUG}
+      - CENTRIFUGO_HEALTH=${CENTRIFUGO_HEALTH}
+      - CENTRIFUGO_SWAGGER=${CENTRIFUGO_SWAGGER}
       - CHOKIDAR_USEPOLLING=true
     ulimits:
       nofile:
