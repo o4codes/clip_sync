@@ -19,7 +19,7 @@ export default {
 
 <template>
   <header>
-    <nav class="container mx-auto md:flex md:justify-between md:items-center">
+    <nav class="container mx-auto md:flex md:justify-between md:items-center py-[2%] sm:py-[2%] px-[4%]  sm:px-[10%]">
       <div class="flex items-center justify-between">
         <router-link to="/" class="text-2xl font-bold md:text-2xl"
           >ClipSync

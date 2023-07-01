@@ -12,7 +12,7 @@ export default {
 </script>
 
 <template>
-  <div id="app" class="px-[4%] py-[2%] sm:px-[15%] sm:py-[2%]">
+  <div id="app" class="flex flex-col">
     <AppHeader />
     <RouterView />
     <AppFooter />

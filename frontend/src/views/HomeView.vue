@@ -1,14 +1,15 @@
 <script>
+import SessionCreate from '../components/SessionCreate.vue';
 
 export default {
-
+    components: {
+        SessionCreate
+    },
 }
 </script>
 
 <template>
-    <main>
-
-    </main>
+    <SessionCreate />
 </template>
 
 <style scoped>
