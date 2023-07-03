@@ -20,4 +20,7 @@ export default {
 </template>
 
 <style scoped>
+  /* #app {
+    background-image: url('./assets/bg.webp');
+  } */
 </style>
