@@ -3,8 +3,8 @@ from typing import Optional
 
 from bson import ObjectId
 from pydantic import BaseModel, Field
-
 from src.libs import DefaultResponse, PaginationModel, PyObjectId
+
 from .models import RoomModel
 
 
@@ -41,3 +41,22 @@ class DeviceRemoveAddSchema(BaseModel):
 
 class RoomJoinInvitationSchema(BaseModel):
     invitation_code: str
+
+
+class SessionUserSchema(BaseModel):
+    user_id: str
+    username: str
+
+
+class SessionCreateSchema(SessionUserSchema):
+    room_id: str
+    invite_code: str
+    user_id: str
+
+
+class SessionJoinLeaveSchema(SessionUserSchema):
+    room_id: str
+
+
+class SessionTextMessageSchema(SessionJoinLeaveSchema):
+    message: str

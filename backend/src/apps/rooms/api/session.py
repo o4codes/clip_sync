@@ -9,26 +9,20 @@ from typing import Optional, TypedDict
 
 import pytz
 from bson import ObjectId
-from fastapi import File, UploadFile, status, Form
-from fastapi.routing import APIRouter
+from fastapi import File, Form, UploadFile, status
 from fastapi.requests import Request
-from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.routing import APIRouter
+from src.config.dependencies import Cache
+from src.libs import WebsocketEvents, exceptions, utils, websocket_emitter
 from starlette.background import BackgroundTasks
 
-from src.config.dependencies import Cache
-from src.libs import exceptions, utils, websocket_emitter, WebsocketEvents
-from .. import schema, constants
+from .. import constants, schema
 from ..libs import QRCodeGenerator
 
 router = APIRouter(prefix="/sessions")
 ROOM_SESSION_KEY = "room_session"
 USER_ID_KEY = "user_id"
-
-
-class RoomSessionDict(TypedDict):
-    room_id: str
-    invite_code: str
-    created_by: str
 
 
 async def _get_client_session(room_session: str = None):
@@ -88,6 +82,13 @@ async def join_session(
         raise exceptions.ForbiddenException("User is present in a session")
     user_id = str(ObjectId())
     session_data = await Cache.get(invitation_data.invitation_code)
+    tasks = BackgroundTasks()
+    tasks.add_task(
+        websocket_emitter.publish,
+        channel=session_data.get("room_id"),
+        event=WebsocketEvents.DEVICE_CONNECTED,
+        data=session_data,
+    )
     response = JSONResponse(content={"status": "SUCCESS", "data": session_data})
     response.set_cookie(
         key=ROOM_SESSION_KEY,
@@ -143,5 +144,5 @@ async def send_message(
     user_id = request.cookies.get(USER_ID_KEY)
     if len(list(filter(lambda bool: (text, media)))) != 1:
         raise exceptions.BadRequest("Only one of text or media is required")
-    # send message
+
     return JSONResponse(content={"status": "SUCCESS", "message": "Message sent"})

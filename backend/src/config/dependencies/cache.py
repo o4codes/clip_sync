@@ -1,7 +1,9 @@
-from decouple import config
+import json
 from datetime import datetime, timedelta
+from typing import Optional
 
-import aioredis, json
+import aioredis
+from decouple import config
 
 
 class Cache:
@@ -30,7 +32,7 @@ class Cache:
         return v.isoformat() if isinstance(v, datetime) else v
 
     @classmethod
-    async def get(cls, key: str):
+    async def get(cls, key: str) -> Optional[dict]:
         redis = cls._get_redis_instance()
         current_hour_stats = await redis.get(key)
 
