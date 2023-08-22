@@ -49,6 +49,6 @@ class Cache:
         )
 
     @classmethod
-    async def rmeove(cls, key: str):
+    async def remove(cls, key: str):
         redis = await cls._get_redis_instance()
         await redis.delete(key)

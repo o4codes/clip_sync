@@ -51,7 +51,6 @@ class SessionUserSchema(BaseModel):
 class SessionCreateSchema(SessionUserSchema):
     room_id: str
     invite_code: str
-    user_id: str
 
 
 class SessionJoinLeaveSchema(SessionUserSchema):
