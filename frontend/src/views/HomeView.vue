@@ -1,13 +1,5 @@
-<script>
+<script setup>
 import {SessionConnect, AppHeader, AppFooter } from "@/components";
-
-export default {
-    components: {
-      AppHeader,
-      AppFooter,
-      SessionConnect,
-    },
-}
 </script>
 
 <template>

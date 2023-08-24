@@ -21,7 +21,7 @@ export default {
   <header>
     <nav class="container mx-auto md:flex md:justify-between md:items-center py-[2%] sm:py-[2%] px-[4%]  sm:px-[10%]">
       <div class="flex items-center justify-between">
-        <router-link to="/" class="text-2xl font-bold md:text-2xl"
+        <router-link to="/" class="text-2xl font-bold logo-font md:text-3xl"
           >ClipSync
         </router-link>
         <!-- Mobile menu button -->
@@ -40,8 +40,8 @@ export default {
         :class="showMenu ? 'flex' : 'hidden'"
         class="flex-col mt-8 space-y-4 md:flex md:space-y-0 md:flex-row md:items-center md:space-x-10 md:mt-0"
       >
-        <router-link to="/">SignUp</router-link>
-        <router-link to="/">Login</router-link>
+        <router-link to="/" class="text-lg">SignUp</router-link>
+        <router-link to="/" class="text-lg">Login</router-link>
       </div>
     </nav>
   </header>

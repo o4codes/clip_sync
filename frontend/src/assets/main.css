@@ -1,6 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400;1,700&family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Dancing+Script:wght@400;700&family=Gochi+Hand&family=Handlee&family=Just+Another+Hand&family=Open+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Raleway:wght@400;500;600;700&family=Roboto:ital,wght@0,400;0,700;1,400;1,700&family=Shadows+Into+Light&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400;1,700&family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Dancing+Script:wght@400;700&family=Gochi+Hand&family=Handlee&family=Just+Another+Hand&family=Open+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Raleway:wght@400;500;600;700&family=Roboto:ital,wght@0,400;0,700;1,400;1,700&family=Shadows+Into+Light&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 
 * {
   padding: 0;
@@ -12,4 +16,16 @@
   font-weight: normal;
   height: 100vh;
   width: 100vw;
+}
+
+.heading-font {
+  font-family: 'Raleway', sans-serif;
+}
+
+.logo-font {
+  font-family: 'Chakra Petch', sans-serif;
+}
+
+.logo-font {
+
 }
