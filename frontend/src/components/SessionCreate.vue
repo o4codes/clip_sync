@@ -6,9 +6,9 @@
             <p class="text-sm">Create an account/Login to store sessions across devices.</p>
             <p class="text-sm">Join or create a session to get started. </p>
         </div>
-        <div class="flex justify-center my-16 gap-2">
-            <button class="bg-orange-300 px-5 py-4 rounded-lg whitespace-nowrap ">New Session</button>
-            <input type="text" name="" class="rounded-md border-orange-300 border-solid border-2 sm:w-4/12 w-11/12 px-3 outline-none focus:border-orange-500" placeholder="Enter Session code">
+        <div class="flex flex-col justify-center my-16 gap-2 md:flex-row ">
+          <input type="text" name="" class="rounded-md border-orange-300 border-solid border-2 px-3 py-3 md:w-4/12 outline-none focus:border-orange-500" placeholder="Enter Session code">
+          <button class="bg-orange-300 px-4 py-3 rounded-lg whitespace-nowrap md:w-1/12 ">New Session</button>
         </div>
     </div>
 </template>
@@ -16,3 +16,5 @@
 <style scoped>
 
 </style>
+<script setup lang="ts">
+</script>
