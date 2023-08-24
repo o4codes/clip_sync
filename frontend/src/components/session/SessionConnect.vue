@@ -8,14 +8,14 @@
         </div>
         <div class="flex flex-col justify-center my-16 gap-2 md:flex-row ">
           <input type="text" v-model="sessionCode" class="rounded-md border-orange-300 border-solid border-2 px-3 py-3 md:w-4/12 outline-none focus:border-orange-500" placeholder="Enter Session code">
-          <HomeSessionBtn :session-code="sessionCode" class="md:w-1/12 "/>
+          <SessionConnectButton :session-code="sessionCode" />
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-  import HomeSessionBtn from "@/components/session/SessionConnectButton.vue";
   import {ref} from "vue";
+  import {SessionConnectButton} from "@/components/session";
 
   const sessionCode = ref("");
 </script>

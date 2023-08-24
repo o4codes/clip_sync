@@ -1,13 +1,11 @@
 <script>
-import SessionCreate from '../components/SessionCreate.vue';
-import AppFooter from "@/components/AppFooter.vue";
-import AppHeader from "@/components/AppHeader.vue";
+import {SessionConnect, AppHeader, AppFooter } from "@/components";
 
 export default {
     components: {
       AppHeader,
       AppFooter,
-      SessionCreate,
+      SessionConnect,
     },
 }
 </script>
@@ -15,7 +13,7 @@ export default {
 <template>
   <main class="flex flex-col h-screen">
     <AppHeader />
-    <SessionCreate class="flex-1"/>
+    <SessionConnect class="flex-1"/>
     <AppFooter />
   </main>
 </template>
