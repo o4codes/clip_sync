@@ -5,20 +5,19 @@ A user can create or be connected one session at a time
 """
 import json
 from datetime import datetime, timezone
-from typing import Optional, TypedDict
+from typing import Optional
 
-import pytz
 from bson import ObjectId
 from fastapi import File, Form, Header, UploadFile, status
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.routing import APIRouter
+
 from src.apps.rooms import constants, schema
 from src.apps.rooms import utils as session_utils
 from src.apps.rooms.libs import QRCodeGenerator
 from src.config.dependencies import Cache
 from src.libs import WebsocketEvents, exceptions, utils
-from starlette.background import BackgroundTasks
 
 router = APIRouter(prefix="/sessions")
 ROOM_SESSION_KEY = "room_session"
