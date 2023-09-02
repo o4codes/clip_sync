@@ -13,47 +13,16 @@ from fastapi import File, Form, Header, UploadFile, status
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.routing import APIRouter
+from src.apps.rooms import constants, schema
+from src.apps.rooms import utils as session_utils
+from src.apps.rooms.libs import QRCodeGenerator
 from src.config.dependencies import Cache
-from src.libs import WebsocketEvents, exceptions, utils, websocket_emitter
+from src.libs import WebsocketEvents, exceptions, utils
 from starlette.background import BackgroundTasks
-
-from .. import constants, schema
-from ..libs import QRCodeGenerator
 
 router = APIRouter(prefix="/sessions")
 ROOM_SESSION_KEY = "room_session"
 USER_SESSION_KEY = "user_session"
-
-
-class EventDataDict(TypedDict):
-    event: WebsocketEvents
-    data: dict
-
-
-async def _get_client_session(room_session: str = None):
-    if room_session:
-        room_session_data: dict = json.loads(room_session)
-        session_data = await Cache.get(room_session_data.get("invite_code"))
-        return session_data
-
-
-def generate_username(user_agent: str):
-    parsed_user_agent = utils.parse_user_agent(user_agent)
-    return (
-        f"{parsed_user_agent.get('device_brand') or ''} {parsed_user_agent.get('os')}"
-    )
-
-
-def generate_background_tasks(room_id: str, events: list[EventDataDict]):
-    tasks = BackgroundTasks()
-    for event, data in events:
-        tasks.add_task(
-            websocket_emitter.publish,
-            channel=room_id,
-            event=event,
-            data=data,
-        )
-    return tasks
 
 
 @router.post(path="", response_class=JSONResponse)
@@ -64,17 +33,17 @@ async def create_session(
     Create anonymous session
     """
     room_session: str = request.cookies.get(ROOM_SESSION_KEY)
-    client_session = await _get_client_session(room_session)
+    client_session = await session_utils.get_client_session(room_session)
     if client_session:
         raise exceptions.ForbiddenException("User already present in a session")
     room_id, user_id = str(ObjectId()), str(ObjectId())
-    username = generate_username(user_agent)
+    username = session_utils.generate_username(user_agent)
     invite_code = f"{constants.ROOM_INVITE_PREFIX}-{utils.get_random_string(length=6)}"
     session_data = schema.SessionCreateSchema(
         room_id=room_id, invite_code=invite_code, user_id=user_id, username=username
     ).dict()
     user_data = schema.SessionUserSchema(username=username, user_id=user_id).dict()
-    tasks = generate_background_tasks(
+    tasks = session_utils.generate_background_tasks(
         session_data.get("room_id"),
         [
             {
@@ -108,15 +77,15 @@ async def join_session(
     user_agent: Optional[str] = Header(default=None),
 ):
     room_session: Optional[str] = request.cookies.get(ROOM_SESSION_KEY)
-    session_data = await _get_client_session(room_session)
+    session_data = await session_utils.get_client_session(room_session)
     if session_data:
         raise exceptions.ForbiddenException("User is present in a session")
     user_data = schema.SessionUserSchema(
-        username=generate_username(user_agent), user_id=str(ObjectId())
+        username=session_utils.generate_username(user_agent), user_id=str(ObjectId())
     ).dict()
     if session_data.get("invite_code") != invitation_data.invitation_code:
         raise exceptions.BadRequest("Invalid invitation code")
-    tasks = generate_background_tasks(
+    tasks = session_utils.generate_background_tasks(
         room_id=session_data.get("room_id"),
         events=[
             {
@@ -147,12 +116,12 @@ async def join_session(
 @router.post(path="/leave", response_class=JSONResponse)
 async def leave_session(request: Request):
     room_session: Optional[str] = request.cookies.get(ROOM_SESSION_KEY)
-    session_data = await _get_client_session(room_session)
+    session_data = await session_utils.get_client_session(room_session)
     user_data = request.cookies.get(USER_SESSION_KEY)
     if not session_data:
         raise exceptions.BadRequest("User is not in a session")
     await Cache.remove(session_data.get("invite_code"))
-    tasks = generate_background_tasks(
+    tasks = session_utils.generate_background_tasks(
         room_id=session_data.get("room_id"),
         events=[
             {
@@ -172,7 +141,7 @@ async def leave_session(request: Request):
 @router.get(path="/qrcode", response_class=JSONResponse)
 async def get_session_qrcode(request: Request):
     room_session: Optional[str] = request.cookies.get(ROOM_SESSION_KEY)
-    session_data = await _get_client_session(room_session)
+    session_data = await session_utils.get_client_session(room_session)
     if not session_data:
         raise exceptions.BadRequest("User is not in a session")
     user_data = request.cookies.get(USER_SESSION_KEY)
@@ -189,7 +158,7 @@ async def send_message(
     media: Optional[UploadFile] = File(default=None, description="Media Message"),
 ):
     room_session: Optional[str] = request.cookies.get(ROOM_SESSION_KEY)
-    session_data = await _get_client_session(room_session)
+    session_data = await session_utils.get_client_session(room_session)
     if not session_data:
         raise exceptions.BadRequest("User is not in a session")
     if len(list(filter(lambda bool: (text, media)))) != 1:

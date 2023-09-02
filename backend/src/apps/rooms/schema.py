@@ -1,9 +1,9 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TypedDict
 
 from bson import ObjectId
 from pydantic import BaseModel, Field
-from src.libs import DefaultResponse, PaginationModel, PyObjectId
+from src.libs import DefaultResponse, PaginationModel, PyObjectId, WebsocketEvents
 
 from .models import RoomModel
 
@@ -59,3 +59,8 @@ class SessionJoinLeaveSchema(SessionUserSchema):
 
 class SessionTextMessageSchema(SessionJoinLeaveSchema):
     message: str
+
+
+class EventDataDict(TypedDict):
+    event: WebsocketEvents
+    data: dict
